@@ -114,7 +114,6 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
     verbose_logging = False
 
     def __init__(self, request, client_address, server, map):
-        self._input_stream = BytesIO()
         self._can_read = True
         self._can_write = False
         self.request = request
@@ -167,6 +166,8 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
                     return
                 elif cont_length > 16 * 1024:
                     self._input_stream = TemporaryFile()
+                else:
+                    self._input_stream = BytesIO()
                 copyfileobj(self.rfile, self._input_stream)
                 self._input_stream.seek(0)
         self._can_write = True

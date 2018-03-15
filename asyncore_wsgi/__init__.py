@@ -256,8 +256,11 @@ class AsyncWsgiServer(asyncore.dispatcher, WSGIServer):
                 self.poll_once(poll_interval)
             except KeyboardInterrupt:
                 break
-        self.handle_close()
+        self.close()
         logging.info('Server stopped.')
+
+    def close(self):
+        asyncore.close_all(self._map, True)
 
 
 def make_server(host, port, app,

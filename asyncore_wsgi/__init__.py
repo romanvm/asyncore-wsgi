@@ -167,6 +167,8 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
                     return
                 elif cont_length > 16 * 1024:
                     self._input_stream = TemporaryFile()
+                else:
+                    self._input_stream = BytesIO()
                 copyfileobj(self.rfile, self._input_stream)
                 self._input_stream.seek(0)
         self._can_write = True

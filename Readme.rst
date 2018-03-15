@@ -7,7 +7,9 @@ It is very efficient on Linux because of using ``epoll``.
 
 The server should be compatible with Python 2.7 and 3.
 
-Example::
+Example:
+
+.. code-block:: python
 
     from from wsgiref.simple_server import demo_app
     from asyncore_wsgi import AsyncWebSocketHandler, make_server

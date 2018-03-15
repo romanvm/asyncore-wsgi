@@ -114,7 +114,6 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
     verbose_logging = False
 
     def __init__(self, request, client_address, server, map):
-        self._input_stream = BytesIO()
         self._can_read = True
         self._can_write = False
         self.request = request
@@ -153,6 +152,7 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
         if self.path == self.ws_path and self.ws_handler_class is not None:
             self._switch_to_websocket()
             return
+        self._input_stream = BytesIO()
         if self.command.lower() in ('post', 'put', 'patch'):
             cont_length = self.headers.get('content-length')
             if cont_length is None:

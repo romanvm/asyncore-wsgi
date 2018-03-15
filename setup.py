@@ -21,5 +21,6 @@ setup(
     author='Roman Miroshnychenko',
     author_email='roman1972@gmail.com',
     description='Asynchronous WSGI and WebSocket server based on asyncore module',
-    long_description=long_descr
+    long_description=long_descr,
+    zip_safe=False
 )

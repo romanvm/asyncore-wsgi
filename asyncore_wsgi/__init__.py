@@ -72,6 +72,7 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
     If ``ws_handler_class`` is set, a request to ``ws_path` is
     upgraded to WebSocket protocol.
     """
+    accepting = False
     server_version = 'AsyncWsgiServer/' + __version__
     protocol_version = 'HTTP/1.1'
     max_input_content_length = 1024 * 1024 * 1024
@@ -110,10 +111,10 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
             self.request_version = ''
             self.command = ''
             self.send_error(414)
-            self.close()
+            self.handle_close()
             return
         if not self.parse_request():
-            self.close()
+            self.handle_close()
             return
         if self.path == self.ws_path and self.ws_handler_class is not None:
             self._switch_to_websocket()
@@ -123,13 +124,13 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
             cont_length = self.headers.get('content-length')
             if cont_length is None:
                 self.send_error(411)
-                self.close()
+                self.handle_close()
                 return
             else:
                 cont_length = int(cont_length)
                 if cont_length > self.max_input_content_length:
                     self.send_error(413)
-                    self.close()
+                    self.handle_close()
                     return
                 elif cont_length > 16 * 1024:
                     self._input_stream = TemporaryFile()
@@ -152,7 +153,7 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
             self.handle_error()
             return
         if self.close_connection:
-            self.close()
+            self.handle_close()
         else:
             self._can_read = True
 
@@ -224,7 +225,7 @@ class AsyncWsgiServer(asyncore.dispatcher, WSGIServer):
                 self.poll_once(poll_interval)
             except KeyboardInterrupt:
                 break
-        self.close()
+        self.handle_close()
         logging.info('Server stopped.')
 
     def close(self):

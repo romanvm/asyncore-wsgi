@@ -573,6 +573,7 @@ class WebSocket(object):
 
 
 class AsyncWebSocketHandler(WebSocket, asyncore.dispatcher):
+    accepting = False
 
     def __init__(self, server, sock, address, request=None, map=None):
         WebSocket.__init__(self, server, sock, address, request)

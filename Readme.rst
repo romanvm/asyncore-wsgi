@@ -3,9 +3,7 @@ asyncore-wsgi
 
 This is a single-threaded asynchronous WSGI server with WebSockets support
 based on `asyncore <https://docs.python.org/3.6/library/asyncore.html>`_ module.
-It is very efficient on Linux because of using ``epoll``.
-
-The server should be compatible with Python 2.7 and 3.
+It should be compatible with Python 2.7 and 3.
 
 Example:
 

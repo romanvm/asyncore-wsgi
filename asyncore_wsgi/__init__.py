@@ -5,8 +5,6 @@
 """
 Single-threaded asynchronous WSGI server with WebSockets support
 
-On Linux it uses ``epoll``, if available, to query for socket events.
-
 Example::
 
     from from wsgiref.simple_server import demo_app
@@ -47,7 +45,7 @@ from .SimpleWebSocketServer import AsyncWebSocketHandler
 __all__ = ['AsyncWsgiHandler', 'AsyncWebSocketHandler', 'AsyncWsgiServer',
             'make_server']
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 logging.basicConfig(
     format='%(asctime)s: %(module)s - %(levelname)s - %(message)s',
@@ -55,45 +53,13 @@ logging.basicConfig(
 )
 
 
-def poll4(timeout=0.0, map=None):
-    """
-    Modified :func:`asyncore.poll2` with ``epoll`` support
-    """
-    if map is None:
-        map = asyncore.socket_map
-    if timeout is not None:
-        # timeout is in milliseconds
-        timeout = int(timeout*1000)
-    if hasattr(select, 'epoll'):
-        pollster = select.epoll()
-    else:
-        pollster = select.poll()
-    if map:
-        for fd, obj in list(map.items()):
-            flags = 0
-            if obj.readable():
-                flags |= select.POLLIN | select.POLLPRI
-            # accepting sockets should not be writable
-            if obj.writable() and not obj.accepting:
-                flags |= select.POLLOUT
-            if flags:
-                pollster.register(fd, flags)
-
-        r = pollster.poll(timeout)
-        for fd, flags in r:
-            obj = map.get(fd)
-            if obj is None:
-                continue
-            asyncore.readwrite(obj, flags)
-
-
 def get_poll_func():
     """Get the best available socket poll function
     
     :return: poller function
     """
-    if hasattr(select, 'poll') or hasattr(select, 'epoll'):
-        poll_func = poll4
+    if hasattr(select, 'poll'):
+        poll_func = asyncore.poll2
     else:
         poll_func = asyncore.poll
     return poll_func

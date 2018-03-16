@@ -134,8 +134,6 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
                     return
                 elif cont_length > 16 * 1024:
                     self._input_stream = TemporaryFile()
-                else:
-                    self._input_stream = BytesIO()
                 copyfileobj(self.rfile, self._input_stream)
                 self._input_stream.seek(0)
         self._can_write = True
@@ -156,6 +154,10 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
             self.handle_close()
         else:
             self._can_read = True
+
+    def handle_error(self):
+        logging.exception('Exception in {}!'.format(repr(self)))
+        self.handle_close()
 
     def close(self):
         WSGIRequestHandler.finish(self)
@@ -191,6 +193,10 @@ class AsyncWsgiServer(asyncore.dispatcher, WSGIServer):
         pair = self.accept()
         if pair is not None:
             self.RequestHandlerClass(pair[0], pair[1], self, self._map)
+
+    def handle_error(self, *args, **kwargs):
+        logging.exception('Exception in {}!'.format(repr(self)))
+        self.handle_close()
 
     def poll_once(self, timeout=0.0):
         """
@@ -229,6 +235,7 @@ class AsyncWsgiServer(asyncore.dispatcher, WSGIServer):
         logging.info('Server stopped.')
 
     def close(self):
+        asyncore.dispatcher.close(self)
         asyncore.close_all(self._map, True)
 
 

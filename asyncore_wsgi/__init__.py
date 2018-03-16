@@ -172,8 +172,12 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
 
 class AsyncWsgiServer(asyncore.dispatcher, WSGIServer):
     """Asynchronous WSGI server"""
-    def __init__(self, server_address, RequestHandlerClass=AsyncWsgiHandler):
-        asyncore.dispatcher.__init__(self)
+    def __init__(self, server_address,
+                 RequestHandlerClass=AsyncWsgiHandler,
+                 map=None):
+        if map is None:
+            map = asyncore.socket_map
+        asyncore.dispatcher.__init__(self, map=map)
         WSGIServer.__init__(self, server_address, RequestHandlerClass, False)
         self._poll_func = get_poll_func()
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)

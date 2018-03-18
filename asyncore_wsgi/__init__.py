@@ -176,7 +176,7 @@ class AsyncWsgiServer(asyncore.dispatcher, WSGIServer):
                  RequestHandlerClass=AsyncWsgiHandler,
                  map=None):
         if map is None:
-            map = asyncore.socket_map
+            map = {}
         asyncore.dispatcher.__init__(self, map=map)
         WSGIServer.__init__(self, server_address, RequestHandlerClass, False)
         self._poll_func = get_poll_func()

@@ -45,12 +45,13 @@ from .SimpleWebSocketServer import AsyncWebSocketHandler
 __all__ = ['AsyncWsgiHandler', 'AsyncWebSocketHandler', 'AsyncWsgiServer',
             'make_server']
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 logging.basicConfig(
-    format='%(asctime)s: %(module)s:%(lineno)d - %(levelname)s - %(message)s',
+    format='%(asctime)s: %(name)s - %(module)s:%(lineno)d - %(levelname)s - %(message)s',
     level=logging.DEBUG
 )
+logger = logging.getLogger('asyncore_wsgi')
 
 
 def get_poll_func():
@@ -145,6 +146,8 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
         handler.server_software = self.server_version
         handler.http_version = self.protocol_version[5:]
         handler.request_handler = self      # backpointer for logging
+        handler.wsgi_multiprocess = False
+        handler.wsgi_multithread = False
         try:
             handler.run(self.server.get_app())
         except Exception:
@@ -153,10 +156,15 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
         if self.close_connection:
             self.handle_close()
         else:
+            try:
+                self.wfile.flush()
+            except socket.error:
+                self.handle_error()
+                return
             self._can_read = True
 
     def handle_error(self):
-        logging.exception('Exception in {}!'.format(repr(self)))
+        logger.exception('Exception in {}!'.format(repr(self)))
         self.handle_close()
 
     def close(self):
@@ -194,12 +202,16 @@ class AsyncWsgiServer(asyncore.dispatcher, WSGIServer):
         return False
 
     def handle_accept(self):
-        pair = self.accept()
-        if pair is not None:
-            self.RequestHandlerClass(pair[0], pair[1], self, self._map)
+        try:
+            pair = self.accept()
+        except socket.error:
+            logger.exception('Exception when accepting a request!')
+        else:
+            if pair is not None:
+                self.RequestHandlerClass(pair[0], pair[1], self, self._map)
 
     def handle_error(self, *args, **kwargs):
-        logging.exception('Exception in {}!'.format(repr(self)))
+        logger.exception('Exception in {}!'.format(repr(self)))
         self.handle_close()
 
     def poll_once(self, timeout=0.0):
@@ -227,16 +239,16 @@ class AsyncWsgiServer(asyncore.dispatcher, WSGIServer):
         :param poll_interval: polling timeout
         :return:
         """
-        logging.info('Starting server on {}:{}...'.format(
+        logger.info('Starting server on {}:{}...'.format(
             self.server_name, self.server_port)
         )
         while True:
             try:
                 self.poll_once(poll_interval)
-            except KeyboardInterrupt:
+            except (KeyboardInterrupt, SystemExit):
                 break
         self.handle_close()
-        logging.info('Server stopped.')
+        logger.info('Server stopped.')
 
     def close(self):
         asyncore.dispatcher.close(self)

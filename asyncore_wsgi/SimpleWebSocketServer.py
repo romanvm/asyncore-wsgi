@@ -31,6 +31,8 @@ from collections import deque
 
 __all__ = ['WebSocket', 'AsyncWebSocketHandler']
 
+logger = logging.getLogger(__name__)
+
 
 def _check_unicode(val):
     if VER >= 3:
@@ -610,7 +612,7 @@ class AsyncWebSocketHandler(WebSocket, asyncore.dispatcher):
             self.handle_error()
 
     def handle_error(self):
-        logging.exception('Exception in {}!'.format(repr(self)))
+        logger.exception('Exception in {}!'.format(repr(self)))
         self.handle_close()
 
     def close(self, status=1000, reason=u''):

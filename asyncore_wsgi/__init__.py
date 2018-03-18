@@ -145,7 +145,7 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
                                 self.get_stderr(), self.get_environ())
         handler.server_software = self.server_version
         handler.http_version = self.protocol_version[5:]
-        handler.request_handler = self      # backpointer for logging
+        handler.request_handler = self  # backpointer for logging
         handler.wsgi_multiprocess = False
         handler.wsgi_multithread = False
         try:
@@ -160,8 +160,8 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
                 self.wfile.flush()
             except socket.error:
                 self.handle_error()
-                return
-            self._can_read = True
+            else:
+                self._can_read = True
 
     def handle_error(self):
         logger.exception('Exception in {}!'.format(repr(self)))

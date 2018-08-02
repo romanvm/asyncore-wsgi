@@ -94,6 +94,7 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
     server_version = 'AsyncWsgiServer/' + __version__
     protocol_version = 'HTTP/1.1'
     max_input_content_length = 1024 * 1024 * 1024
+    max_input_in_memory = 16 * 1024
     ws_path = '/ws'
     ws_handler_class = None
     verbose_logging = False
@@ -152,7 +153,7 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
                     self.send_error(413)
                     self.handle_close()
                     return
-                elif cont_length > 16 * 1024:
+                elif cont_length > self.max_input_in_memory:
                     self._input_stream = TemporaryFile()
                 copyfileobj(self.rfile, self._input_stream)
                 self._input_stream.seek(0)

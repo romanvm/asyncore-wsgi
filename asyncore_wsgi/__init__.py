@@ -236,7 +236,7 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
                     self.handle_error()
                 else:
                     self._can_read = True
-        except:
+        except Exception:
             self.handle_error()
         else:
             self._can_write = True

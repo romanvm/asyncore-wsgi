@@ -36,6 +36,7 @@ import asyncore
 import logging
 import select
 import socket
+from errno import EINTR
 from io import BytesIO
 from shutil import copyfileobj
 from tempfile import TemporaryFile
@@ -54,12 +55,49 @@ logging.basicConfig(
 logger = logging.getLogger('asyncore_wsgi')
 
 
+def epoll_poller(timeout=0.0, map=None):
+    """
+    A poller which uses epoll(), supported on Linux 2.5.44 and newer
+
+    Borrowed from here:
+    https://github.com/m13253/python-asyncore-epoll/blob/master/asyncore_epoll.py#L200
+    """
+    if map is None:
+        map = asyncore.socket_map
+    pollster = select.epoll()
+    if map:
+        for fd, obj in map.items():
+            flags = 0
+            if obj.readable():
+                flags |= select.POLLIN | select.POLLPRI
+            if obj.writable():
+                flags |= select.POLLOUT
+            if flags:
+                # Only check for exceptions if object was either readable
+                # or writable.
+                flags |= select.POLLERR | select.POLLHUP | select.POLLNVAL
+                pollster.register(fd, flags)
+        try:
+            r = pollster.poll(timeout)
+        except select.error as err:
+            if err.args[0] != EINTR:
+                raise
+            r = []
+        for fd, flags in r:
+            obj = map.get(fd)
+            if obj is None:
+                continue
+            asyncore.readwrite(obj, flags)
+
+
 def get_poll_func():
     """Get the best available socket poll function
     
     :return: poller function
     """
-    if hasattr(select, 'poll'):
+    if hasattr(select, 'epoll'):
+        poll_func = epoll_poller
+    elif hasattr(select, 'poll'):
         poll_func = asyncore.poll2
     else:
         poll_func = asyncore.poll

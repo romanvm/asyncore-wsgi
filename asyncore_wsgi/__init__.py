@@ -333,7 +333,7 @@ class AsyncWsgiServer(asyncore.dispatcher, WSGIServer):
         asyncore.close_all(self._map, True)
 
 
-def make_server(host, port, app,
+def make_server(host, port, app=None,
                 server_class=AsyncWsgiServer,
                 handler_class=AsyncWsgiHandler,
                 ws_handler_class=None,

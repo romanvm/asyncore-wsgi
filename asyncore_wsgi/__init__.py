@@ -46,7 +46,7 @@ from .SimpleWebSocketServer import AsyncWebSocketHandler
 __all__ = ['AsyncWsgiHandler', 'AsyncWebSocketHandler', 'AsyncWsgiServer',
             'make_server']
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 logging.basicConfig(
     format='%(asctime)s: %(name)s - %(module)s:%(lineno)d - %(levelname)s - %(message)s',

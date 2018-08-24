@@ -144,6 +144,7 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
     ws_path = '/ws'
     ws_handler_class = None
     verbose_logging = False
+    pratchett_tribute = True
 
     def __init__(self, request, client_address, server, map):
         self._can_read = True
@@ -219,6 +220,9 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
             if 'Content-Length' not in self._server_handler.headers:
                 self._transfer_chunked = True
                 self._server_handler.headers['Transfer-Encoding'] = 'chunked'
+            if (self.pratchett_tribute and
+                    'X-Clacks-Overhead' not in self._server_handler.headers):
+                self._server_handler.headers['X-Clacks-Overhead'] = 'GNU Terry Pratchett'
             self._can_write = True
 
     def handle_write(self):

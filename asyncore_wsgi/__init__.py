@@ -36,6 +36,7 @@ import asyncore
 import logging
 import select
 import socket
+import sys
 from errno import EINTR
 from io import BytesIO
 from shutil import copyfileobj
@@ -55,6 +56,13 @@ logging.basicConfig(
 logger = logging.getLogger('asyncore_wsgi')
 
 
+def iteritems(dct):
+    """Get iterator for dict items"""
+    if sys.version_info[0] == 2:
+        return dct.iteritems()
+    return dct.items()
+
+
 def epoll_poller(timeout=0.0, map=None):
     """
     A poller which uses epoll(), supported on Linux 2.5.44 and newer
@@ -66,7 +74,7 @@ def epoll_poller(timeout=0.0, map=None):
         map = asyncore.socket_map
     pollster = select.epoll()
     if map:
-        for fd, obj in map.items():
+        for fd, obj in iteritems(map):
             flags = 0
             if obj.readable():
                 flags |= select.POLLIN | select.POLLPRI

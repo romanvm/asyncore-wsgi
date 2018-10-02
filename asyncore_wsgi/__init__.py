@@ -136,7 +136,6 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
     If ``ws_handler_class`` is set, a request to ``ws_path` is
     upgraded to WebSocket protocol.
     """
-    accepting = False
     server_version = 'AsyncWsgiServer/' + __version__
     protocol_version = 'HTTP/1.1'
     max_input_content_length = 1024 * 1024 * 1024

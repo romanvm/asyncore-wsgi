@@ -49,10 +49,6 @@ __all__ = ['AsyncWsgiHandler', 'AsyncWebSocketHandler', 'AsyncWsgiServer',
 
 __version__ = '0.0.7'
 
-logging.basicConfig(
-    format='%(asctime)s: %(name)s - %(module)s:%(lineno)d - %(levelname)s - %(message)s',
-    level=logging.DEBUG
-)
 logger = logging.getLogger('asyncore_wsgi')
 
 

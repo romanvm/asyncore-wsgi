@@ -32,16 +32,17 @@ the Standard Library and the echo WebSocket on ``'/ws'`` path.
 """
 
 from __future__ import absolute_import
+
 import asyncore
 import logging
 import select
 import socket
-import sys
 from errno import EINTR
 from io import BytesIO
 from shutil import copyfileobj
 from tempfile import TemporaryFile
 from wsgiref.simple_server import WSGIServer, ServerHandler, WSGIRequestHandler
+
 from .SimpleWebSocketServer import AsyncWebSocketHandler
 
 __all__ = ['AsyncWsgiHandler', 'AsyncWebSocketHandler', 'AsyncWsgiServer',
@@ -70,7 +71,7 @@ def epoll_poller(timeout=0.0, map=None):
         map = asyncore.socket_map
     pollster = select.epoll()
     if map:
-        for fd, obj in iteritems(map):
+        for fd, obj in map.items():
             flags = 0
             if obj.readable():
                 flags |= select.POLLIN | select.POLLPRI
@@ -254,7 +255,7 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
             self._can_write = True
 
     def handle_error(self):
-        logger.exception('Exception in {}!'.format(repr(self)))
+        logger.exception('Error in %s!', repr(self))
         self.handle_close()
 
     def close(self):
@@ -301,7 +302,7 @@ class AsyncWsgiServer(asyncore.dispatcher, WSGIServer):
                 self.RequestHandlerClass(pair[0], pair[1], self, self._map)
 
     def handle_error(self, *args, **kwargs):
-        logger.exception('Exception in {}!'.format(repr(self)))
+        logger.exception('Error in %s!', repr(self))
         self.handle_close()
 
     def poll_once(self, timeout=0.0):
@@ -329,9 +330,8 @@ class AsyncWsgiServer(asyncore.dispatcher, WSGIServer):
         :param poll_interval: polling timeout
         :return:
         """
-        logger.info('Starting server on {}:{}...'.format(
-            self.server_name, self.server_port)
-        )
+        logger.info('Starting server on %s:%s...',
+                    self.server_name, self.server_port)
         while True:
             try:
                 self.poll_once(poll_interval)

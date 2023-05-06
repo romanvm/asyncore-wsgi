@@ -124,6 +124,11 @@ class AsyncServerHandler(ServerHandler):
         """Get WSGI response iterator for sending in handle_write"""
         self.iterator = iter(self.result)
 
+    def close(self):
+        super().close()
+        if hasattr(self.stdin, 'close'):
+            self.stdin.close()
+
 
 class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
     """

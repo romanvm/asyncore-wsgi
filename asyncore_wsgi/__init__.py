@@ -189,22 +189,17 @@ class AsyncWsgiHandler(asyncore.dispatcher, WSGIRequestHandler):
             self._switch_to_websocket()
             return
         self._input_stream = BytesIO()
-        if self.command.lower() in ('post', 'put', 'patch'):
-            cont_length = self.headers.get('content-length')
-            if cont_length is None:
-                self.send_error(411)
+        cont_length = self.headers.get('content-length')
+        if cont_length is not None:
+            cont_length = int(cont_length)
+            if cont_length > self.max_input_content_length:
+                self.send_error(413)
                 self.handle_close()
                 return
-            else:
-                cont_length = int(cont_length)
-                if cont_length > self.max_input_content_length:
-                    self.send_error(413)
-                    self.handle_close()
-                    return
-                elif cont_length > self.max_input_in_memory:
-                    self._input_stream = TemporaryFile()
-                copyfileobj(self.rfile, self._input_stream)
-                self._input_stream.seek(0)
+            elif cont_length > self.max_input_in_memory:
+                self._input_stream = TemporaryFile()
+            copyfileobj(self.rfile, self._input_stream)
+            self._input_stream.seek(0)
         self._server_handler = AsyncServerHandler(
             self._input_stream, self.wfile, self.get_stderr(),
             self.get_environ())

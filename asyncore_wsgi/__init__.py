@@ -33,7 +33,6 @@ the Standard Library and the echo WebSocket on ``'/ws'`` path.
 
 from __future__ import absolute_import
 
-import asyncore
 import logging
 import select
 import socket
@@ -43,6 +42,7 @@ from shutil import copyfileobj
 from tempfile import TemporaryFile
 from wsgiref.simple_server import WSGIServer, ServerHandler, WSGIRequestHandler
 
+from . import asyncore
 from .SimpleWebSocketServer import AsyncWebSocketHandler
 
 __all__ = ['AsyncWsgiHandler', 'AsyncWebSocketHandler', 'AsyncWsgiServer',

@@ -19,7 +19,6 @@ else:
     from BaseHTTPServer import BaseHTTPRequestHandler
     from StringIO import StringIO
 
-import asyncore
 import hashlib
 import base64
 import socket
@@ -28,6 +27,8 @@ import errno
 import codecs
 import logging
 from collections import deque
+
+from . import asyncore
 
 __all__ = ['WebSocket', 'AsyncWebSocketHandler']
 

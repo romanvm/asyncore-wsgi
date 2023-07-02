@@ -53,13 +53,6 @@ __version__ = '0.0.10'
 logger = logging.getLogger('asyncore_wsgi')
 
 
-def iteritems(dct):
-    """Get iterator for dict items"""
-    if sys.version_info[0] == 2:
-        return dct.iteritems()
-    return dct.items()
-
-
 def epoll_poller(timeout=0.0, map=None):
     """
     A poller which uses epoll(), supported on Linux 2.5.44 and newer
